@@ -6,7 +6,7 @@ from beanie import init_beanie, PydanticObjectId
 from app.models import UserDocument, UserCreate, TaskDocument, TaskCreate 
 from typing import List 
 from passlib.context import CryptContext
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 load_dotenv()
@@ -17,6 +17,13 @@ app = FastAPI()
 MONGO_URL = os.getenv("DB_URL")
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 db = client["tasks_db"]  # Change to your preferred database name
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Adjust for your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Initialize Beanie models at startup
@@ -89,3 +96,20 @@ async def get_tasks_for_user(user_id: PydanticObjectId):
         raise HTTPException(status_code=404, detail="No tasks found for this user")
     
     return tasks
+
+@app.put("/tasks/{task_id}", response_model=TaskDocument)
+async def update_task_status(task_id: PydanticObjectId, task_update: TaskCreate):
+    task = await TaskDocument.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Update the task's status and other fields if necessary
+    task.status = task_update.status  # Update status
+    task.title = task_update.title  # Optionally update other fields
+    task.description = task_update.description
+    task.due_date = task_update.due_date
+    task.tags = task_update.tags
+
+    await task.save()  # Save the updated task
+    return task
+

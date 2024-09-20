@@ -24,7 +24,7 @@
         class="flex-col items-center mr-2 w-1/3 bg-blue-50 rounded-lg border border-blue-300 shadow-lg"
       >
         <h2 class="m-2 text-3xl text-blue-700 text-start">To-do</h2>
-        <draggable v-model="todoTasks" group="tasks" tag="ul">
+        <!-- <draggable v-model="todoTasks" group="tasks" tag="ul">
           <template #item="{ element: task, index }">
             <li
               :key="task.id"
@@ -32,9 +32,21 @@
                 'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
                 { 'bg-blue-500 text-white': true },
               ]"
-              @drop="changeTaskColor(task, 'doing')"
             >
               {{ task.name }}
+            </li>
+          </template>
+        </draggable> -->
+        <draggable v-model="todoTasks" group="tasks" tag="ul">
+          <template #item="{ element: task, index }">
+            <li
+              :key="task._id"
+              :class="[
+                'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
+                { 'bg-blue-500 text-white': true },
+              ]"
+            >
+              {{ task.title }}
             </li>
           </template>
         </draggable>
@@ -51,7 +63,6 @@
                 'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
                 { 'bg-yellow-500 text-white': true },
               ]"
-              @drop="changeTaskColor(task, 'done')"
             >
               {{ task.name }}
             </li>
@@ -78,10 +89,14 @@
       </div>
     </div>
   </div>
+  <p>{{ todoTask }}</p>
 </template>
 
 <script>
 import draggable from "vuedraggable";
+import axios from "axios";
+
+axios.defaults.baseURL = "http://127.0.0.1:8000/";
 
 export default {
   name: "Home",
@@ -90,40 +105,57 @@ export default {
   },
   data() {
     return {
+      // newTask: "",
+      // todoTasks: [
+      //   { id: 1, name: "Walk the dog" },
+      //   { id: 2, name: "Eat some pizza" },
+      //   { id: 3, name: "Clean the Kitchen" },
+      // ],
+      // doingTasks: [
+      //   { id: 4, name: "Walk the cat" },
+      //   { id: 5, name: "Eat some burger" },
+      //   { id: 6, name: "Clean the Bathroom" },
+      // ],
+      // doneTasks: [
+      //   { id: 7, name: "Walk the Bird" },
+      //   { id: 8, name: "Eat some tacos" },
+      //   { id: 9, name: "Clean the dining room" },
+      // ],
+      userId: "66ec8f44442a61ac3c243ba6", // example user ID
       newTask: "",
-      todoTasks: [
-        { id: 1, name: "Walk the dog" },
-        { id: 2, name: "Eat some pizza" },
-        { id: 3, name: "Clean the Kitchen" },
-      ],
-      doingTasks: [
-        { id: 4, name: "Walk the cat" },
-        { id: 5, name: "Eat some burger" },
-        { id: 6, name: "Clean the Bathroom" },
-      ],
-      doneTasks: [
-        { id: 7, name: "Walk the Bird" },
-        { id: 8, name: "Eat some tacos" },
-        { id: 9, name: "Clean the dining room" },
-      ],
+      todoTasks: [],
+      doingTasks: [],
+      doneTasks: [],
+      loading: false, // For showing loading state
     };
   },
+  mounted() {
+    this.fetchTasks();
+  },
   methods: {
-    addTask() {
-      if (this.newTask) {
-        const newTask = { id: Date.now(), name: this.newTask };
-        this.todoTasks.push(newTask);
-        this.newTask = ""; // Clear input after adding
-      }
-    },
-    changeTaskColor(task, newCategory) {
-      if (newCategory === "doing") {
-        // Change color and animate
-        setTimeout(() => {
-          // Change the task category
-          this.doingTasks.push(task);
-          this.todoTasks = this.todoTasks.filter((t) => t.id !== task.id);
-        }, 1000); // Delay to allow color transition to show
+    // addTask() {
+    //   if (this.newTask) {
+    //     const newTask = { id: Date.now(), name: this.newTask };
+    //     this.todoTasks.push(newTask);
+    //     this.newTask = ""; // Clear input after adding
+    //   }
+    // },
+    async fetchTasks() {
+      this.loading = true; // Show loading indicator
+      try {
+        console.log("Fetching tasks for user ID:", this.userId);
+        const response = await axios.get(`/users/${this.userId}/tasks`);
+        const tasks = response.data;
+        console.log("Fetched tasks:", tasks);
+
+        // Organize tasks by status
+        this.todoTasks = tasks.filter((task) => task.status === "Todo");
+        this.doingTasks = tasks.filter((task) => task.status === "Doing");
+        this.doneTasks = tasks.filter((task) => task.status === "Done");
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      } finally {
+        this.loading = false; // Hide loading indicator
       }
     },
   },
