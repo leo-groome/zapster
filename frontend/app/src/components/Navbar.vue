@@ -1,21 +1,16 @@
 <template>
   <nav
-    class="flex flex-col pt-3 w-64 h-screen border-r border-gray-300 bg-navwhite"
+    class="flex flex-col pt-3 w-64 h-screen border-r border-gray-300 shadow-lg bg-navwhite"
   >
     <ul class="flex-col">
       <li
-        class="flex py-2 pr-40 my-0 text-4xl font-bold text-black align-middle rounded-lg border-b border-gray-300"
+        class="flex justify-center items-center px-6 py-4 my-0 text-5xl font-bold text-blue-800 align-middle rounded-lg border-b border-gray-300 transition duration-200 hover:bg-blue-100"
       >
-        <img
-          src="/ZapsterLogoNB.png"
-          alt="ZapsterLogo"
-          class="pb-2 mx-3 w-12 h-12"
-        />
-        <h1 class="font-extrabold align-middle">Zapster</h1>
+        <h1 class="text-5xl font-extrabold">Zapster</h1>
       </li>
       <li
         @click="$emit('change-page', 'home')"
-        class="flex py-2 pr-40 my-1 text-black rounded-lg border-b border-gray-300 cursor-pointer hover:bg-black hover:text-white"
+        class="flex items-center px-6 py-3 my-1 text-black rounded-lg border-b border-gray-300 transition duration-200 cursor-pointer hover:bg-blue-500 hover:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +27,7 @@
       </li>
       <li
         @click="$emit('change-page', 'calendar')"
-        class="flex py-2 my-1 text-black rounded-lg border-b border-gray-300 cursor-pointer hover:bg-black hover:text-white"
+        class="flex items-center px-6 py-3 my-1 text-black rounded-lg border-b border-gray-300 transition duration-200 cursor-pointer hover:bg-blue-500 hover:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +44,7 @@
       </li>
       <li
         @click="$emit('change-page', 'account')"
-        class="flex py-2 my-1 text-black rounded-lg border-b border-gray-300 cursor-pointer hover:bg-black hover:text-white"
+        class="flex items-center px-6 py-3 my-1 text-black rounded-lg border-b border-gray-300 transition duration-200 cursor-pointer hover:bg-blue-500 hover:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -73,3 +68,10 @@ export default {
   name: "Navbar",
 };
 </script>
+
+<style scoped>
+.nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #3b5bb3; /* Change to your accent color */
+}
+</style>

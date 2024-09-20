@@ -28,9 +28,9 @@ export default {
 </script>
 
 <template>
-  <div id="app" class="flex w-screen bg-white">
+  <div id="app" class="flex w-screen h-screen bg-white">
     <Navbar @change-page="currentPage = $event" class="flex" />
-    <main class="flex">
+    <main class="flex-grow">
       <component :is="currentComponent"></component>
     </main>
   </div>
@@ -38,9 +38,19 @@ export default {
 
 <style>
 body {
-  margin: 0;
-  font-family: "Montserrat" sans-serif;
+  font-family: "Nunito", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  display: flex;
+  height: 100vh; /* Make the app full height */
+}
+
+main {
+  display: flex;
+  flex-direction: column; /* Stack child components vertically */
+  padding: 16px; /* Add padding for spacing */
 }
 </style>
