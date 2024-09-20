@@ -18,11 +18,15 @@ class UserDocument(Document, UserCreate):
 class TaskCreate(BaseModel):
     title: str # Obligarorio
     description: Optional[str] = "None"  # Optional 
-    due_date: Optional[datetime] = "None"  # Optional 
+    due_date: datetime  # Optional 
     tags: Optional[str] = "None"  # Optional 
     status: str = "Todo"  # Default == "Todo" Obligarorio
     user_id: PydanticObjectId  # Relacion con usuario Obligarorio
- 
+
 class TaskDocument(Document, TaskCreate):
     class Settings:
         collection = "tasks"
+
+# Model for updating task status only
+class TaskUpdate(BaseModel):
+    status: str

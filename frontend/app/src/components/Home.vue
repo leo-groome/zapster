@@ -19,77 +19,78 @@
         Add Task
       </button>
     </div>
+
     <div class="flex flex-row flex-grow justify-between p-4">
       <div
         class="flex-col items-center mr-2 w-1/3 bg-blue-50 rounded-lg border border-blue-300 shadow-lg"
+        data-status="Todo"
       >
         <h2 class="m-2 text-3xl text-blue-700 text-start">To-do</h2>
-        <!-- <draggable v-model="todoTasks" group="tasks" tag="ul">
-          <template #item="{ element: task, index }">
-            <li
-              :key="task.id"
-              :class="[
-                'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
-                { 'bg-blue-500 text-white': true },
-              ]"
-            >
-              {{ task.name }}
-            </li>
-          </template>
-        </draggable> -->
-        <draggable v-model="todoTasks" group="tasks" tag="ul">
-          <template #item="{ element: task, index }">
+        <draggable
+          v-model="todoTasks"
+          group="tasks"
+          @change="onTaskChange('Todo')"
+          tag="ul"
+        >
+          <template #item="{ element: task }">
             <li
               :key="task._id"
-              :class="[
-                'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
-                { 'bg-blue-500 text-white': true },
-              ]"
+              :data-id="task._id"
+              class="p-3 m-2 text-white bg-blue-500 rounded-md transition-colors duration-1000 cursor-grab"
             >
               {{ task.title }}
             </li>
           </template>
         </draggable>
       </div>
+
       <div
         class="flex-col items-center mr-2 w-1/3 bg-yellow-50 rounded-lg border border-yellow-300 shadow-lg"
+        data-status="Doing"
       >
         <h2 class="m-2 text-3xl text-yellow-700 text-start">Doing</h2>
-        <draggable v-model="doingTasks" group="tasks" tag="ul">
-          <template #item="{ element: task, index }">
+        <draggable
+          v-model="doingTasks"
+          group="tasks"
+          @change="onTaskChange('Doing')"
+          tag="ul"
+        >
+          <template #item="{ element: task }">
             <li
-              :key="task.id"
-              :class="[
-                'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
-                { 'bg-yellow-500 text-white': true },
-              ]"
+              :key="task._id"
+              :data-id="task._id"
+              class="p-3 m-2 text-white bg-yellow-500 rounded-md transition-colors duration-1000 cursor-grab"
             >
-              {{ task.name }}
+              {{ task.title }}
             </li>
           </template>
         </draggable>
       </div>
+
       <div
         class="flex-col items-center w-1/3 bg-green-50 rounded-lg border border-green-300 shadow-lg"
+        data-status="Done"
       >
         <h2 class="m-2 text-3xl text-green-700 text-start">Done</h2>
-        <draggable v-model="doneTasks" group="tasks" tag="ul">
-          <template #item="{ element: task, index }">
+        <draggable
+          v-model="doneTasks"
+          group="tasks"
+          @change="onTaskChange('Done')"
+          tag="ul"
+        >
+          <template #item="{ element: task }">
             <li
-              :key="task.id"
-              :class="[
-                'p-3 m-2 rounded-md cursor-grab transition-colors duration-1000',
-                { 'bg-green-500 text-white': true },
-              ]"
+              :key="task._id"
+              :data-id="task._id"
+              class="p-3 m-2 text-white bg-green-500 rounded-md transition-colors duration-1000 cursor-grab"
             >
-              {{ task.name }}
+              {{ task.title }}
             </li>
           </template>
         </draggable>
       </div>
     </div>
   </div>
-  <p>{{ todoTask }}</p>
 </template>
 
 <script>
@@ -105,22 +106,6 @@ export default {
   },
   data() {
     return {
-      // newTask: "",
-      // todoTasks: [
-      //   { id: 1, name: "Walk the dog" },
-      //   { id: 2, name: "Eat some pizza" },
-      //   { id: 3, name: "Clean the Kitchen" },
-      // ],
-      // doingTasks: [
-      //   { id: 4, name: "Walk the cat" },
-      //   { id: 5, name: "Eat some burger" },
-      //   { id: 6, name: "Clean the Bathroom" },
-      // ],
-      // doneTasks: [
-      //   { id: 7, name: "Walk the Bird" },
-      //   { id: 8, name: "Eat some tacos" },
-      //   { id: 9, name: "Clean the dining room" },
-      // ],
       userId: "66ec8f44442a61ac3c243ba6", // example user ID
       newTask: "",
       todoTasks: [],
@@ -133,20 +118,11 @@ export default {
     this.fetchTasks();
   },
   methods: {
-    // addTask() {
-    //   if (this.newTask) {
-    //     const newTask = { id: Date.now(), name: this.newTask };
-    //     this.todoTasks.push(newTask);
-    //     this.newTask = ""; // Clear input after adding
-    //   }
-    // },
     async fetchTasks() {
       this.loading = true; // Show loading indicator
       try {
-        console.log("Fetching tasks for user ID:", this.userId);
         const response = await axios.get(`/users/${this.userId}/tasks`);
         const tasks = response.data;
-        console.log("Fetched tasks:", tasks);
 
         // Organize tasks by status
         this.todoTasks = tasks.filter((task) => task.status === "Todo");
@@ -156,6 +132,46 @@ export default {
         console.error("Error fetching tasks:", error);
       } finally {
         this.loading = false; // Hide loading indicator
+      }
+    },
+
+    async onTaskChange(newStatus) {
+      // This event will trigger when a task changes its position in a new list
+      // We know the new status because we pass it as an argument in the @change event
+
+      console.log(`Task moved to: ${newStatus}`);
+
+      // Find the task that was moved
+      // Since `vuedraggable` updates the `v-model`, we can find out which task is now in this list
+      const updatedTaskLists = {
+        Todo: this.todoTasks,
+        Doing: this.doingTasks,
+        Done: this.doneTasks,
+      };
+
+      // Loop over each updated task list
+      Object.entries(updatedTaskLists).forEach(([status, tasks]) => {
+        tasks.forEach(async (task) => {
+          // If a task now belongs to the new status category, update the status in the database
+          if (status === newStatus) {
+            console.log(`Updating task ${task._id} to ${newStatus}`);
+            await this.updateTaskStatus(task._id, newStatus);
+          }
+        });
+      });
+    },
+
+    async updateTaskStatus(taskId, newStatus) {
+      try {
+        const response = await axios.put(
+          `http://127.0.0.1:8000/tasks/${taskId}`,
+          {
+            status: newStatus,
+          }
+        );
+        console.log("Task status updated:", response.data);
+      } catch (error) {
+        console.error("Error updating task status:", error);
       }
     },
   },

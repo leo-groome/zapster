@@ -3,7 +3,7 @@ import motor.motor_asyncio
 import os
 from dotenv import load_dotenv
 from beanie import init_beanie, PydanticObjectId
-from app.models import UserDocument, UserCreate, TaskDocument, TaskCreate 
+from app.models import UserDocument, UserCreate, TaskDocument, TaskCreate, TaskUpdate
 from typing import List 
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
@@ -98,18 +98,16 @@ async def get_tasks_for_user(user_id: PydanticObjectId):
     return tasks
 
 @app.put("/tasks/{task_id}", response_model=TaskDocument)
-async def update_task_status(task_id: PydanticObjectId, task_update: TaskCreate):
+async def update_task(task_id: PydanticObjectId, task_update: TaskUpdate):
     task = await TaskDocument.get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    
-    # Update the task's status and other fields if necessary
-    task.status = task_update.status  # Update status
-    task.title = task_update.title  # Optionally update other fields
-    task.description = task_update.description
-    task.due_date = task_update.due_date
-    task.tags = task_update.tags
 
-    await task.save()  # Save the updated task
+    # Update the status
+    task.status = task_update.status
+    await task.save()
+
     return task
+
+
 
