@@ -96,6 +96,7 @@
 <script>
 import draggable from "vuedraggable";
 import axios from "axios";
+import { dateFormat } from "vue-cal/dist/i18n/en.cjs";
 
 axios.defaults.baseURL = "http://127.0.0.1:8000/";
 
@@ -132,6 +133,48 @@ export default {
         console.error("Error fetching tasks:", error);
       } finally {
         this.loading = false; // Hide loading indicator
+      }
+    },
+
+    getCurrentDateTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    },
+
+    async addTask() {
+      // Check if the task input is empty
+      if (this.newTask.trim() === "") {
+        alert("Please enter a task title");
+        return;
+      }
+
+      // Construct the task object with empty strings instead of null
+      const newTask = {
+        title: this.newTask, // Required field
+        description: "", // Use empty string instead of null
+        due_date: this.getCurrentDateTime(), // Provide an empty string for due_date if no date is selected
+        tags: "", // Use an empty string for tags
+        status: "Todo", // Default status is 'Todo'
+        user_id: this.userId, // User ID is required
+      };
+
+      try {
+        // Send the POST request to add the new task
+        const response = await axios.post(`/tasks/`, newTask);
+
+        // Add the new task to the todoTasks list if successful
+        this.todoTasks.push(response.data);
+
+        // Clear the input field after adding the task
+        this.newTask = "";
+      } catch (error) {
+        console.error("Error adding new task:", error);
       }
     },
 
